@@ -1,0 +1,35 @@
+name: Publish workshop site
+
+# Deploys the Quarto book to GitHub Pages on every push to main.
+#
+# This workflow relies on Quarto's "freeze" feature: the computed results in the
+# committed /_freeze folder are reused, so the CI runner does NOT need R, the
+# CRAN packages, or access to the Koda forge. Render once locally (where you have
+# the evodemohypermpm package), commit /_freeze, and push. See README.md.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write          # allows the action to push to the gh-pages branch
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Quarto (with TinyTeX for the PDF download)
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          tinytex: true
+
+      - name: Render and publish to gh-pages
+        uses: quarto-dev/quarto-actions/publish@v2
+        with:
+          target: gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,15 @@
+{
+  "hash": "b47ede83ab0a92bfc797a57258f98e3b",
+  "result": {
+    "engine": "knitr",
+    "markdown": "# Before you arrive {.unnumbered}\n\nPlease run this once **before** the workshop. It takes ~10 minutes and means we start by modelling,\nnot troubleshooting.\n\n## 1. R and a few CRAN packages\n\nYou need R (≥ 4.2) and, ideally, RStudio or Positron. Install the helper packages:\n\n\n::: {.cell}\n\n```{.r .cell-code}\ninstall.packages(c(\"remotes\", \"tidyverse\", \"pracma\", \"gsignal\", \"purrr\", \"tidyr\", \"Matrix\"))\n```\n:::\n\n\n## 2. The workshop package\n\n`evodemohypermpm` lives on the CNRS *Koda* forge, not CRAN, so we install it straight from there:\n\n\n::: {.cell}\n\n```{.r .cell-code}\nremotes::install_gitlab(\n  repo = \"timotheebonnet/evodemohypermpm\",\n  host = \"https://src.koda.cnrs.fr/\"\n)\n```\n:::\n\n\n::: {.callout-note title=\"If install_gitlab cannot reach Koda\"}\nSome institutional networks block the forge. As a fallback, clone the repository and install locally:\n\n\n::: {.cell}\n\n```{.r .cell-code}\n# in a terminal:  git clone https://src.koda.cnrs.fr/timotheebonnet/evodemohypermpm.git\nremotes::install_local(\"evodemohypermpm\")\n```\n:::\n\n:::\n\n## 3. Smoke test\n\nLoad the package and run one tiny projection. If you get a plot, you are ready.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(evodemohypermpm)\n\ntest <- MPM(g = 10, Fe = 0.2286, SA = 0.95, SJ = 0.8, S0 = 0.8, Y = 0.07)\nplot(test$properties_per_year[, c(\"year\", \"N\")], type = \"l\",\n     xlab = \"year\", ylab = \"population size\")\n```\n:::\n\n\n::: {.callout-note title=\"One detail to check\"}\nAfter installation, the package should load as `library(evodemohypermpm)` and expose the function\n`MPM()`. If `library()` complains, open the project's `DESCRIPTION` file and use whatever name appears\non the `Package:` line. Everything else in this workshop is unchanged.\n:::\n\n## Reproducibility\n\nThis whole site is built from plain `.qmd` files with [Quarto](https://quarto.org). Two things make\nyour results reproducible:\n\n- **`R/_setup.R`** loads the packages, sets the shared plotting theme, and defines the five-species\n  table. Every chapter sources it, so a colour or a parameter always means the same thing.\n- We record the exact computing environment below. If you ever get different numbers, compare your\n  session to this one first.\n\nIf you want to *lock* the package versions, the repository ships with an optional\n[`renv`](https://rstudio.github.io/renv/) lockfile — run `renv::restore()` to reproduce the exact\nenvironment used to build the site.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsessionInfo()\n```\n:::\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

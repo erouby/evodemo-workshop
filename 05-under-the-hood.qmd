@@ -1,0 +1,227 @@
+# Under the hood {#sec-under-the-hood}
+
+```{r}
+#| include: false
+source("R/_setup.R")
+source("R/theoretical_rates.R")
+```
+
+::: {.callout-note title="What you'll be able to do"}
+Describe how the hyperstate matrix is assembled from small building blocks, see where inheritance
+enters, list the six definitions of adaptation rate, and reproduce the paper's check that the
+matrix model agrees with the analytic theory.
+:::
+
+This part is for the curious. None of it is needed to *use* `MPM()` — but understanding the machine
+makes you trust its outputs and bend it to new questions.
+
+## Three dimensions instead of one
+
+A classic MPM tracks individuals by **stage** only — a vector of (juveniles, adults). The
+EvoDemo-Hyper MPM tracks them by **stage × breeding value × phenotype**: a three-dimensional
+*hyperstate* [@roth2016]. Each cell counts the individuals that are, say, "adult, with breeding value
+class 12, expressing phenotype class 15".
+
+The full projection matrix factorises into a survival part $\tilde{\mathbf{U}}$ and a reproduction
+part $\tilde{\mathbf{F}}$,
+
+$$
+\mathbf{n}_{t+1} = \tilde{\mathbf{A}}[\mathbf{n}_t]\,\mathbf{n}_t,
+\qquad
+\tilde{\mathbf{A}} = \tilde{\mathbf{U}} + \tilde{\mathbf{F}},
+$$
+
+and each of those is built by applying one process per dimension, **shuffling the population vector
+between steps with vec-permutation matrices** so that each block acts on the right axis
+[@hunter2005]. The package handles all of this; the result is just sparse-matrix multiplication.
+
+## The building blocks
+
+The hyperstate matrix is assembled from a few tiny operations. Here they are — the same definitions
+the model uses internally — so you can see exactly how the machine is put together. We define them
+here so this chapter is self-contained:
+
+```{r}
+#| label: building-blocks-def
+Emat <- function(i, j, u) {                 # a matrix of zeros with a single 1 at (i, j)
+  E <- matrix(0, nrow = u, ncol = u)
+  E[i, j] <- 1
+  E
+}
+
+speye <- function(N) {                      # a sparse identity matrix
+  Matrix::sparseMatrix(i = 1:N, j = 1:N, x = rep(1, N))
+}
+
+GVLE <- function(zz, Va) {                  # the Mendelian segregation kernel
+  exp(-(zz^2) / Va) / sqrt(pi * Va)
+}
+
+BD_proj_mat <- function(B) {                # assemble a block-diagonal matrix from an array of blocks
+  siz <- dim(B)[-1]
+  s   <- prod(siz)
+  sk  <- s / siz[1]
+  siz <- siz[2:3]
+  A   <- matrix(0, nrow = s, ncol = s)
+  for (i in 1:sk) {
+    r <- ((i - 1) %% siz[1]) + 1
+    c <- floor((i - 1) / siz[1]) + 1
+    A <- A + kronecker(Emat(i, i, sk), B[, , r, c])
+  }
+  A
+}
+```
+
+`Emat()` places a single 1 in an otherwise empty matrix — the atom of the block-diagonal construction:
+
+```{r}
+#| label: emat
+Emat(2, 3, 4)
+```
+
+`speye()` makes a sparse identity (breeding value and phenotype are assumed fixed within a lifetime,
+so their within-life transition matrices are identities):
+
+```{r}
+#| label: speye
+as.matrix(speye(3))
+```
+
+And `BD_proj_mat()` assembles a block-diagonal matrix from an array of blocks — the operation behind
+$\mathbb{U}, \mathbb{B}, \mathbb{P}$ and friends:
+
+```{r}
+#| label: fig-block-diagonal
+#| fig-cap: "A block-diagonal matrix built by `BD_proj_mat()` from a 2×2×3×3 array of blocks. This sparse structure is what makes the model fast."
+#| fig-height: 3.6
+toy <- array(runif(2 * 2 * 3 * 3, 1, 8), dim = c(2, 2, 3, 3))
+image(BD_proj_mat(toy), main = "Block-diagonal structure")
+```
+
+## Where inheritance enters
+
+Offspring do not copy a parent's breeding value — they sample one. Under the **Fisher infinitesimal
+model**, an offspring's breeding value is drawn from a normal distribution centred on the mid-parent
+value, with variance equal to half the additive genetic variance. The function `GVLE()` defined above
+is exactly this segregation kernel:
+
+```{r}
+#| label: fig-segregation
+#| fig-cap: "The Mendelian segregation kernel `GVLE()`: the spread of offspring breeding values around the mid-parent value, for Va = 0.2."
+zz <- seq(-2, 2, by = 0.05)
+tibble(z = zz, density = GVLE(zz, Va = 0.2)) |>
+  ggplot(aes(z, density)) +
+  geom_area(fill = species_pal["3"], alpha = 0.5) +
+  geom_line(linewidth = 0.8, colour = species_pal["4"]) +
+  labs(x = "Offspring breeding value (relative to mid-parent)", y = "Density",
+       title = "Inheritance as a convolution")
+```
+
+Each year the model convolves the parental breeding-value distribution with this kernel — that single
+step is the entire evolutionary engine.
+
+## Six ways to define "adaptation rate"
+
+A recurring theme of the workshop is that adaptation rate is not one number. The paper lays out
+**six definitions** built from two choices:
+
+- **Time unit** — per **year** (RAT) or per **generation** (RAG).
+- **Selection unit** — on the linear/link scale ($\beta$), per unit of the **vital rate** ($\theta$),
+  or per unit of **individual fitness** ($R_0$): giving $RA_{S\theta}$ and $RA_{SR_0}$ variants.
+
+Their punchline: under the most standardised definition (per generation, per unit of fitness), the
+rate collapses to $h^2 V_P$ — **identical for every species and every vital rate**. Strip away the
+standardisation and the differences between species reappear. The "disagreement" between fields was
+largely a disagreement about *units* [@vandewalle2025].
+
+## Does the matrix model match the theory?
+
+This is the validation that earns trust. We compute the analytic per-year rate (RAT) for all five
+species under each vital rate, then overlay the *realised* rate from running `MPM()`.
+
+```{r}
+#| label: theory-table
+theory <- species |>
+  mutate(th = pmap(list(F, SA, SJ, Y = gamma),
+                   \(F, SA, SJ, Y) theoretical_rates(F, SA, SJ, Y, Va = 0.2, beta = 0.15))) |>
+  select(species, th) |>
+  unnest(th) |>
+  select(species, rate, theory_year = per_year)
+```
+
+```{r}
+#| label: mpm-sweep-ch5
+project_one <- function(sp, rate) {
+  MPM(h2 = 0.2, Vp = 1, Beta = 0.15,
+      Fe = species$F[sp], SA = species$SA[sp], SJ = species$SJ[sp],
+      S0 = species$SJ[sp], Y = species$gamma[sp], selectedrate = rate)
+}
+
+mpm <- expand_grid(species = factor(1:5), rate = c("Fe", "SJ", "SA", "Y")) |>
+  mutate(mpm_year = map2_dbl(as.integer(species), rate, \(s, r) project_one(s, r)$V))
+
+compare <- left_join(mpm, theory, by = c("species", "rate"))
+```
+
+```{r}
+#| label: fig-theory-vs-mpm
+#| fig-cap: "Per-year adaptation rate: bars are the realised values from `MPM()`, points are the analytic theory. They line up across species and vital rates — the matrix model is doing what the maths says it should."
+#| fig-width: 8.5
+#| fig-height: 4
+ggplot(compare, aes(species)) +
+  geom_col(aes(y = mpm_year, fill = rate), alpha = 0.55, width = 0.7) +
+  geom_point(aes(y = theory_year), size = 2, colour = "grey15") +
+  facet_wrap(~rate, scales = "free_y", labeller = as_labeller(vital_lab)) +
+  scale_fill_manual(values = vital_pal, guide = "none") +
+  labs(x = "Species (fast → slow)", y = "Adaptation rate per year",
+       title = "Simulation (bars) vs analytic theory (points)")
+```
+
+::: {.callout-tip title="Key idea"}
+The matrix model is not a black box that *replaces* theory — it *agrees* with it, and then keeps
+working in the many cases where closed-form formulas run out (non-Gaussian trait distributions,
+evolving variances, plasticity). That is the whole argument for the approach.
+:::
+
+## Tuning and the artefacts to watch
+
+A few arguments control the numerical grid. Used carelessly they produce believable-looking nonsense,
+so it pays to know them.
+
+- **`g`** — number of breeding-value/phenotype classes (default 20). More classes = finer resolution
+  but slower (≈ 1 s at `g = 10`, ≈ 8 s at `g = 40`). The paper used 40.
+- **`xp`** — the half-range of trait values, i.e. the grid spans $[-x_p, x_p]$ (default 4).
+- **`timeA`** — number of years projected (default 100).
+
+::: {.callout-warning title="Heads-up — the boundary artefact"}
+If the trait adapts far enough to reach the edge of the grid, the distribution piles up against the
+boundary and the adaptation rate becomes unreliable. The fix is to give it more room (`xp`) or fewer
+years (`timeA`). The model **warns you** when the genetic distribution is too narrow or too wide for
+the chosen grid — read those warnings.
+:::
+
+```{r}
+#| label: boundary-warning
+#| warning: true
+#| fig-height: 3
+# A deliberately under-resolved setup: very low heritability on a coarse grid.
+risky <- MPM(g = 20, xp = 2, h2 = 0.01, Beta = 0.15,
+             Fe = species$F[4], SA = species$SA[4], SJ = species$SJ[4],
+             S0 = species$SJ[4], Y = species$gamma[4],
+             enforce_initial_lambda1 = TRUE)
+
+plot(risky$properties_per_year[, c("year", "Va")], type = "l",
+     xlab = "year", ylab = "realised Va",
+     main = "Additive variance eroding — partly real, partly artefact")
+```
+
+The realised additive variance drifts away from the requested value: some of this is genuine erosion
+of variance under selection, but some is the grid being too coarse to represent a narrow
+distribution. Always check `Va` and `Vp` in `properties_per_year` against what you asked for.
+
+Two more useful switches:
+
+- **`enforce_initial_lambda1 = TRUE`** adjusts fertility so the population starts at $\lambda = 1$
+  (a stationary baseline) — handy when you want to isolate evolution from raw growth.
+- **`stabilise_population_structure = FALSE`** starts away from the stable stage distribution, letting
+  you observe transient demographic oscillations before equilibrium.

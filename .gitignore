@@ -1,0 +1,26 @@
+# Quarto build output (regenerated; do not commit)
+/_book/
+/.quarto/
+/templates/*.pdf
+/templates/*_files/
+my_figure.pdf
+
+# IMPORTANT: keep /_freeze tracked — it is what lets CI deploy without R/Koda.
+# (No rule ignores it on purpose.)
+
+# R / RStudio
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# renv library (the lockfile is committed; the library is not)
+renv/library/
+renv/staging/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+**/*.quarto_ipynb

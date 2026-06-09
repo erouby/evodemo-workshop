@@ -1,0 +1,100 @@
+# Export & extend {#sec-export-and-extend}
+
+```{r}
+#| include: false
+source("R/_setup.R")
+```
+
+::: {.callout-note title="What you'll be able to do"}
+Save a publication-ready figure to PDF, generate a parameterised PDF report of your own run, and
+point yourself toward the model's natural extensions.
+:::
+
+## Getting things out as PDF
+
+There are two senses of "PDF output", and the workshop gives you both.
+
+**The whole workshop as a PDF.** Use the **Download PDF** link in the sidebar — Quarto renders this
+entire site to a single document from the same source you have been reading.
+
+**A figure as a vector PDF.** For your own results, `ggsave()` writes a clean, scalable PDF you can
+drop straight into a manuscript. Build the figure once, then save it:
+
+```{r}
+#| label: build-summary-fig
+out <- MPM(h2 = 0.2, Vp = 1, Beta = 0.15,
+           Fe = species$F[3], SA = species$SA[3], SJ = species$SJ[3],
+           S0 = species$SJ[3], Y = species$gamma[3], selectedrate = "SJ")
+
+p <- out$pheno_distribution |>
+  filter(year %in% seq(1, 101, by = 25)) |>
+  ggplot(aes(phenotypic_midvalue, density, colour = factor(year))) +
+  geom_line(linewidth = 0.8) +
+  scale_colour_viridis_d(option = "mako", direction = -1, name = "Year") +
+  labs(x = "Phenotype value", y = "Density",
+       title = "Passerine under juvenile-survival selection")
+p
+```
+
+```{r}
+#| label: save-pdf
+#| eval: false
+ggsave("my_figure.pdf", p, width = 7, height = 4.2, device = cairo_pdf)
+```
+
+**A full parameterised report.** The repository ships a template at `templates/report.qmd`. Render it
+to PDF for any species and selection scenario without editing the file — just pass parameters:
+
+```{r}
+#| eval: false
+quarto::quarto_render(
+  "templates/report.qmd",
+  execute_params = list(species_id = 5, rate = "SA", beta = 0.3, h2 = 0.2)
+)
+```
+
+This is the reproducible way to hand a collaborator a tidy PDF for a specific run: the parameters are
+recorded in the document itself.
+
+## Extending the model
+
+The two-stage life cycle with one trait is a teaching scaffold. The same framework reaches further —
+here is where to look next, all grounded in the original paper [@vandewalle2025].
+
+**Phenotypic plasticity.** In the base model an individual keeps its phenotype for life (the
+within-life phenotype-transition matrices $\mathbf{P}_{ij}$ are identities). Make them *non-identity*
+and a trait can change with age or with the environment — that is plasticity, expressed in exactly the
+same matrix language as evolution.
+
+**Two-sex inheritance.** The model already tracks male *and* female breeding values, so paternal
+contributions are not ignored — a known shortcoming of several earlier evolutionary IPMs. Keep this in
+mind when comparing results to single-sex frameworks.
+
+**Evolving genetic variance.** The base model holds $V_A$, $V_P$ and $h^2$ at birth constant. The
+authors note that letting $V_A$ vary is computationally cheap to add, though it requires committing to
+assumptions about genetic architecture.
+
+**Richer life cycles.** Nothing restricts the demography to two stages. The vec-permutation
+construction scales to any stage-structured life cycle — including the kinds of long-lived marine and
+terrestrial vertebrates these methods were built for.
+
+## Capstone — your turn
+
+::: {.callout-important title="A question to take home"}
+Pick a species you actually study (or the closest of our five). Decide which vital rate selection most
+plausibly acts on, and which **definition** of adaptation rate answers your real question — per year
+for a management horizon, per generation for a genetic one. Run it, plot the trait distribution
+through time, and export a one-figure PDF. You now have a reproducible eco-evolutionary projection for
+your system — and a clear-eyed sense of what its adaptation rate does and does not mean.
+:::
+
+## Where the code lives
+
+- **Package** (install from here): the `evodemohypermpm` repository on the CNRS Koda forge.
+- **Full code** (MATLAB + R + the individual-based model): `fledge-whoi/Eco-EvoHyperstateModel` on GitHub.
+- **Reproduction archive** for the paper's figures: the project's Zenodo deposit.
+- **The paper**: Van de Walle, Garnier, Bonnet & Jenouvrier (2025), *Methods in Ecology and Evolution*
+  [@vandewalle2025] — the citation for any work using the model.
+
+Thank you for working through it. Go model an adaptation rate, and report the number rather than
+guessing it.

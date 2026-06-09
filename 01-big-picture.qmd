@@ -1,0 +1,99 @@
+# The big picture {#sec-big-picture}
+
+::: {.callout-note title="What you'll be able to do"}
+Explain, in plain words, what the EvoDemo-Hyper MPM adds to an ordinary matrix population model,
+and name the four vital rates and the genetic quantities the model tracks.
+:::
+
+## Two ways of thinking about change
+
+When a population meets a changing environment, two research communities reach for different tools.
+
+**Demographers** describe a population as numbers of individuals in *stages* — juveniles, adults —
+and project them forward with a **matrix population model (MPM)**. This captures the life cycle
+beautifully but, in its classic form, has no genetics: it cannot let a trait *evolve*.
+
+**Evolutionary quantitative geneticists** describe a *trait* — its mean, its heritable (additive
+genetic) variance — and predict its response to selection with the **breeder's equation**. This
+captures evolution but tends to flatten the life cycle into a single "generation".
+
+These two pictures have sometimes produced *contradictory* claims about how fast species adapt
+[@vandewalle2025]. The EvoDemo-Hyper MPM dissolves the contradiction by doing both at once: it keeps
+the full life cycle of an MPM **and** lets a heritable trait evolve, in one matrix that is fast to
+compute and transparent to inspect.
+
+::: {.callout-tip title="Key idea"}
+The EvoDemo-Hyper MPM is an ordinary matrix model with **two extra dimensions bolted on**: besides
+*stage*, every individual also carries a **breeding value** (its heritable genetic contribution) and
+a **phenotype**. Selection reshapes the trait distribution; inheritance passes it to offspring.
+:::
+
+## The life cycle
+
+Everything in this workshop rests on one simple, two-stage life cycle: **juveniles (J)** and
+**adults (A)**, censused just before breeding, with annual time steps.
+
+::: {.content-visible when-format="html"}
+```{mermaid}
+flowchart LR
+  J(("Juvenile<br/>J")) -->|"S_J · γ — mature"| A(("Adult<br/>A"))
+  J -->|"S_J · (1−γ) — stay J"| J
+  A -->|"S_A — survive"| A
+  A -->|"F — reproduce"| J
+```
+:::
+
+Four **vital rates** govern the transitions:
+
+- $S_J$ — juvenile survival,
+- $S_A$ — adult survival,
+- $\gamma$ — the probability a surviving juvenile matures into an adult,
+- $F$ — fertility, the per-capita number of juveniles an adult contributes next year ($F = f \times S_J$).
+
+Stacked into a projection matrix, the demography is just a $2\times2$ Leslie matrix:
+
+$$
+\mathbf{A} =
+\begin{pmatrix}
+S_J(1-\gamma) & F \\[2pt]
+S_J\,\gamma   & S_A
+\end{pmatrix}.
+$$
+
+That is the *entire* demographic skeleton. The five species you will meet later differ only in the
+numbers that fill these four slots.
+
+## Adding genetics
+
+Now give every individual a quantitative trait $z$ that influences one of the vital rates. Following
+the classic decomposition, the phenotype is a population mean plus a heritable **breeding value** and
+an **environmental deviation**:
+
+$$
+z = \bar{z} + a + e, \qquad V_P = V_A + V_E, \qquad h^2 = \frac{V_A}{V_P}.
+$$
+
+Here $V_P$ is the phenotypic variance, $V_A$ the additive genetic variance, and $h^2$ the
+**heritability** — the fraction of trait variation that is passed on. Selection acts on $z$; only the
+breeding value $a$ is inherited.
+
+The model discretises both the breeding value and the phenotype into a grid of classes (centred on
+zero, spanning $\pm$ a range you choose). So instead of tracking "how many juveniles and adults",
+it tracks **how many individuals of each (stage, breeding value, phenotype) combination** — a
+three-dimensional *hyperstate*. Offspring draw their breeding value from their parents via the Fisher
+infinitesimal model, which is how evolution enters.
+
+You do not need the matrix algebra to use the model — we open that engine in
+@sec-under-the-hood. For now, hold on to this:
+
+::: {.callout-tip title="The model in one sentence"}
+Project a population through its life cycle, but on a grid of trait values, so that selection bends
+the trait distribution one way and inheritance passes the bent distribution to the next generation —
+and read off both **population dynamics** and **trait evolution** from the same run.
+:::
+
+::: {.callout-important title="Your turn — make a prediction"}
+A fast-living grass and a slow-living albatross face the *same* selection pressure on the *same*
+heritable trait. Which one do you expect to adapt **faster per year**? Write your guess down —
+we will test it in @sec-slow-fast, and the answer is more interesting than it looks.
+:::

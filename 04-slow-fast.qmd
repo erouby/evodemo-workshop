@@ -1,0 +1,133 @@
+# The slow–fast continuum {#sec-slow-fast}
+
+```{r}
+#| include: false
+source("R/_setup.R")
+```
+
+::: {.callout-note title="What you'll be able to do"}
+Run the model across five species spanning the slow–fast life-history continuum, and show why
+"which species adapts fastest?" has **no single answer** — it flips depending on whether you measure
+adaptation per year or per generation.
+:::
+
+## Five species, one life cycle
+
+The five species differ only in the four numbers that fill the Leslie matrix. Sorted by generation
+time, they march from fast (a grass) to slow (an albatross):
+
+```{r}
+#| label: tbl-species
+species |>
+  transmute(Species = species, `Life history` = label,
+            `Fertility F` = F, `Adult surv. SA` = SA, `Juv. surv. SJ` = SJ,
+            `Maturation γ` = gamma, `Generation time T` = Tgen)
+```
+
+## Project every species under every selection scenario
+
+We sweep all $5 \times 4 = 20$ combinations. The pattern is the same helper as before, mapped over a grid:
+
+```{r}
+#| label: full-sweep
+project_one <- function(sp, rate) {
+  MPM(
+    h2 = 0.2, Vp = 1, Beta = 0.15,
+    Fe = species$F[sp], SA = species$SA[sp], SJ = species$SJ[sp],
+    S0 = species$SJ[sp], Y = species$gamma[sp],
+    selectedrate = rate
+  )
+}
+
+res <- expand_grid(sp = 1:5, rate = c("Fe", "SJ", "SA", "Y")) |>
+  mutate(
+    run      = map2(sp, rate, project_one),
+    per_year = map_dbl(run, "V"),          # RAT: adaptation per year
+    Tgen     = map_dbl(run, "T_GEN"),
+    per_gen  = per_year * Tgen             # RAG: adaptation per generation
+  ) |>
+  select(-run) |>
+  mutate(sp = factor(sp))
+```
+
+## The same result, two definitions
+
+Now the heart of the matter. We plot the realised adaptation rate two ways — **per year** and **per
+generation** — and the story changes completely.
+
+```{r}
+#| label: fig-two-definitions
+#| fig-cap: "Adaptation rate across the slow–fast continuum (species 1 = fastest, 5 = slowest), under selection on each vital rate. Left: per year. Right: per generation. The same 20 runs tell two different stories."
+#| fig-width: 8.5
+#| fig-height: 4
+res |>
+  select(sp, rate, `per year` = per_year, `per generation` = per_gen) |>
+  pivot_longer(c(`per year`, `per generation`),
+               names_to = "unit", values_to = "rate_value") |>
+  mutate(unit = factor(unit, levels = c("per year", "per generation"))) |>
+  ggplot(aes(sp, rate_value, fill = rate)) +
+  geom_col(position = position_dodge2(), width = 0.8) +
+  facet_wrap(~unit, scales = "free_y") +
+  scale_fill_manual(values = vital_pal, labels = vital_lab, name = "Selection on") +
+  labs(x = "Species (fast → slow)", y = "Adaptation rate",
+       title = "Who adapts fastest? It depends how you ask")
+```
+
+Read the two panels against each other:
+
+- **Per year (left):** adaptation generally *slows down* as you move from fast to slow species — an
+  albatross changes less per calendar year than a grass. But note the exception for adult survival,
+  where intermediate species can peak.
+- **Per generation (right):** the picture rearranges. For some vital rates the slow species now look
+  *as adaptable or more so*, because each of their generations is worth many years.
+
+## The cleanest demonstration: fertility
+
+Zoom in on selection acting on **fertility** alone:
+
+```{r}
+#| label: fig-fertility-zoom
+#| fig-cap: "Selection on fertility only. Per year, adaptation falls steeply with generation time. Per generation, it is essentially flat — every species adapts the same amount per generation."
+#| fig-height: 3.4
+res |>
+  filter(rate == "Fe") |>
+  select(sp, `per year` = per_year, `per generation` = per_gen) |>
+  pivot_longer(-sp, names_to = "unit", values_to = "rate_value") |>
+  ggplot(aes(sp, rate_value, group = unit, colour = unit)) +
+  geom_line(linewidth = 0.9) + geom_point(size = 2.4) +
+  scale_colour_manual(values = c("per year" = "#B5651D", "per generation" = "#3E6E83"),
+                      name = NULL) +
+  labs(x = "Species (fast → slow)", y = "Adaptation rate",
+       title = "Fertility selection: a textbook result")
+```
+
+This is not a quirk of the simulation — it falls straight out of the theory. When selection acts on
+fertility, the per-generation rate reduces to $h^2 V_P\,\beta$, which contains **no species-specific
+term at all**. Per year you then divide by generation time, so the slow species lag. (We derive and
+check this in @sec-under-the-hood.)
+
+::: {.callout-tip title="Key idea — the punchline"}
+There is **no universal answer** to "which species adapts fastest." It depends on (1) the species'
+life cycle, (2) which vital rate selection targets, and (3) **how you define adaptation** — per year
+or per generation, and in what units of selection. The original study makes exactly this point: don't
+assume an answer from intuition; model the rate with the definition that matters to your question, and
+read off the number [@vandewalle2025].
+:::
+
+::: {.callout-important title="Your turn"}
+Your prediction from @sec-big-picture — grass versus albatross — was about adaptation *per year*.
+Look at the left panel: were you right? Now look at the right panel. Did the albatross "lose" on both
+definitions, or only one? Which definition would a conservation manager planning over **calendar
+years** care about, and which would a quantitative geneticist reach for?
+:::
+
+::: {.callout-caution title="Discussion — there isn't one right answer" collapse="true"}
+A manager allocating effort over the next few decades thinks in **years**, so the per-year panel is
+their world: fast species adapt more in the time available. A quantitative geneticist studying the
+*genetic* response thinks in **generations**, where the breeder's equation lives — and there the slow
+albatross is far from hopeless. Both are correct; they are answering different questions. Recognising
+which definition a claim rests on is half the battle in cross-disciplinary work on adaptation.
+:::
+
+You have now done the core of the workshop: you can run the model, read it, and reason about its
+central result. The next part opens the engine for those who want it.

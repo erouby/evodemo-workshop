@@ -1,0 +1,42 @@
+/*-- scss:defaults --*/
+
+// Typography — Proza Libre for text, a clean mono for code
+@import url('https://fonts.googleapis.com/css2?family=Proza+Libre:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+$font-family-sans-serif: "Proza Libre", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+$font-family-monospace: "JetBrains Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+// A muted, restrained palette
+$primary:   #3E6E83;   // slate-teal accent
+$body-color: #232a2f;
+$link-color: #2f6173;
+
+$font-size-root: 17px;
+$toc-font-size: 0.85rem;
+
+/*-- scss:rules --*/
+
+h1, h2, h3, h4 { letter-spacing: -0.01em; }
+
+h1.title { font-weight: 600; }
+
+// Slightly softer code blocks
+div.sourceCode {
+  border: 1px solid #e6e8ea;
+  border-radius: 6px;
+  background-color: #fafbfc;
+}
+
+// Callouts read as quiet margin notes rather than loud boxes
+.callout { border-radius: 6px; }
+.callout.callout-style-simple { border-left-width: 4px; }
+
+// "Your turn" exercises: a gentle highlight
+.callout-important > .callout-header { background-color: #f5efe3 !important; }
+
+// Make the active sidebar item match the accent
+.sidebar-item .active { color: $primary !important; font-weight: 600; }
+
+// Tables: lighter, airier
+table { font-size: 0.92em; }
+thead th { border-bottom: 2px solid #d8dde0; }

@@ -1,0 +1,73 @@
+# Before you arrive {.unnumbered}
+
+Please run this once **before** the workshop. It takes ~10 minutes and means we start by modelling,
+not troubleshooting.
+
+## 1. R and a few CRAN packages
+
+You need R (≥ 4.2) and, ideally, RStudio or Positron. Install the helper packages:
+
+```{r}
+#| eval: false
+install.packages(c("remotes", "tidyverse", "pracma", "gsignal", "purrr", "tidyr", "Matrix"))
+```
+
+## 2. The workshop package
+
+`evodemohypermpm` lives on the CNRS *Koda* forge, not CRAN, so we install it straight from there:
+
+```{r}
+#| eval: false
+remotes::install_gitlab(
+  repo = "timotheebonnet/evodemohypermpm",
+  host = "https://src.koda.cnrs.fr/"
+)
+```
+
+::: {.callout-note title="If install_gitlab cannot reach Koda"}
+Some institutional networks block the forge. As a fallback, clone the repository and install locally:
+
+```{r}
+#| eval: false
+# in a terminal:  git clone https://src.koda.cnrs.fr/timotheebonnet/evodemohypermpm.git
+remotes::install_local("evodemohypermpm")
+```
+:::
+
+## 3. Smoke test
+
+Load the package and run one tiny projection. If you get a plot, you are ready.
+
+```{r}
+#| eval: false
+library(evodemohypermpm)
+
+test <- MPM(g = 10, Fe = 0.2286, SA = 0.95, SJ = 0.8, S0 = 0.8, Y = 0.07)
+plot(test$properties_per_year[, c("year", "N")], type = "l",
+     xlab = "year", ylab = "population size")
+```
+
+::: {.callout-note title="One detail to check"}
+After installation, the package should load as `library(evodemohypermpm)` and expose the function
+`MPM()`. If `library()` complains, open the project's `DESCRIPTION` file and use whatever name appears
+on the `Package:` line. Everything else in this workshop is unchanged.
+:::
+
+## Reproducibility
+
+This whole site is built from plain `.qmd` files with [Quarto](https://quarto.org). Two things make
+your results reproducible:
+
+- **`R/_setup.R`** loads the packages, sets the shared plotting theme, and defines the five-species
+  table. Every chapter sources it, so a colour or a parameter always means the same thing.
+- We record the exact computing environment below. If you ever get different numbers, compare your
+  session to this one first.
+
+If you want to *lock* the package versions, the repository ships with an optional
+[`renv`](https://rstudio.github.io/renv/) lockfile — run `renv::restore()` to reproduce the exact
+environment used to build the site.
+
+```{r}
+#| eval: false
+sessionInfo()
+```

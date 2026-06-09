@@ -1,0 +1,153 @@
+# Your first model {#sec-first-model}
+
+```{r}
+#| include: false
+source("R/_setup.R")
+```
+
+::: {.callout-note title="What you'll be able to do"}
+Run a full eco-evolutionary projection with one call to `MPM()`, find your way around its output,
+and turn that output into the three plots you will use for the rest of the workshop.
+:::
+
+## One function, one projection
+
+The whole model is driven by a single function, `MPM()`. We hand it the four vital rates, the
+genetics ($h^2$, $V_P$), and the selection strength ($\beta$). Let's project **species 1** (a fast,
+grass-like life history) with selection acting on fertility — the package defaults.
+
+```{r}
+#| label: first-run
+out <- MPM(
+  h2   = 0.2,            # heritability of the selected trait
+  Vp   = 1,             # phenotypic variance
+  Beta = 0.15,          # strength of selection (on the link scale)
+  Fe   = species$F[1],      # fertility
+  SA   = species$SA[1],     # adult survival
+  SJ   = species$SJ[1],     # juvenile survival
+  S0   = species$SJ[1],     # newborn survival (here equal to SJ)
+  Y    = species$gamma[1],  # maturation rate
+  selectedrate = "Fe"   # the vital rate selection acts on
+)
+```
+
+That's it — a deterministic eco-evolutionary projection over 100 years. (We pass `S0` separately
+because the model lets newborn survival differ from later juvenile survival; here we keep them equal.)
+
+## What came back
+
+```{r}
+#| label: structure
+str(out, max.level = 1)
+```
+
+Three pieces matter today:
+
+- **`properties_per_year`** — a tidy data frame with one row per year. It holds population size `N`,
+  growth rate `lambda`, the realised variances `Va`/`Vp`, and the mean breeding value of adults and
+  juveniles (`M_EBVSA`, `M_EBVSJ`). This is your demographic *and* evolutionary timeline in one table.
+- **`pheno_distribution`** — the full trait distribution: how many individuals sit in each phenotype
+  class, every year. This is what lets us *watch* the trait evolve.
+- The scalars **`T_GEN`** (generation time), **`LAMBDA0`** (initial growth rate) and **`V`** (the mean
+  change in breeding value per year — a realised adaptation rate).
+
+```{r}
+#| label: head-properties
+head(out$properties_per_year[, c("year", "N", "lambda", "Va", "M_EBVSA", "M_EBVSJ")])
+```
+
+## Plot 1 — the population grows
+
+```{r}
+#| label: fig-popsize
+#| fig-cap: "Population size over 100 years. With directional selection and no density dependence, the population grows without bound — that is expected, not a bug."
+ggplot(out$properties_per_year, aes(year, N)) +
+  geom_line(linewidth = 0.9, colour = species_pal["1"]) +
+  labs(x = "Year", y = "Population size", title = "Species 1 — population trajectory")
+```
+
+::: {.callout-warning title="Heads-up — exponential growth is by design"}
+The model has **no density dependence**: selection raises $\lambda$ above 1, so the population
+explodes. We care about the *trait*, not the absolute numbers. If you want a constant-size baseline,
+set `enforce_initial_lambda1 = TRUE` (it tunes fertility so the starting $\lambda = 1$).
+:::
+
+## Plot 2 — the trait evolves
+
+Here is the evolution half of the story: the mean **breeding value** climbs over time as selection
+favours individuals with higher trait values.
+
+::: {.callout-important title="Your turn — predict first"}
+Before running the next chunk: with positive selection on fertility, do you expect the mean breeding
+value to go **up**, **down**, or **stay flat**? Should adults and juveniles differ?
+:::
+
+```{r}
+#| label: fig-breeding-value
+#| fig-cap: "Mean breeding value of adults and juveniles. Selection drags the genetic mean upward; juveniles lead because they are the freshly-recruited, more-selected cohort."
+out$properties_per_year |>
+  select(year, adult = M_EBVSA, juvenile = M_EBVSJ) |>
+  pivot_longer(-year, names_to = "age_class", values_to = "mean_bv") |>
+  ggplot(aes(year, mean_bv, colour = age_class)) +
+  geom_line(linewidth = 0.9) +
+  scale_colour_manual(values = age_pal, name = NULL) +
+  labs(x = "Year", y = "Mean breeding value", title = "Genetic change through time")
+```
+
+## Plot 3 — the whole distribution sliding
+
+Means hide the action. The trait distribution itself slides to the right as the population adapts.
+Plotting a few yearly snapshots makes the movement visible.
+
+```{r}
+#| label: fig-pheno-distribution
+#| fig-cap: "Phenotype distribution every 20 years. The hump shifts toward higher trait values — adaptation in motion."
+out$pheno_distribution |>
+  filter(year %in% seq(1, 101, by = 20)) |>
+  ggplot(aes(phenotypic_midvalue, density, colour = year, group = year)) +
+  geom_line(linewidth = 0.8) +
+  scale_colour_viridis_c(option = "mako", direction = -1, name = "Year") +
+  labs(x = "Phenotype value", y = "Density",
+       title = "The trait distribution adapts over 100 years")
+```
+
+::: {.callout-tip title="Key idea"}
+`properties_per_year` is your *summary* timeline; `pheno_distribution` is the *full* picture. Almost
+every figure in this workshop is one of these two objects, reshaped and plotted.
+:::
+
+## Your turn — drive it yourself
+
+::: {.callout-important title="Exercise"}
+1. Re-run the projection for the **albatross** (species 5) instead of the grass. Which `species$`
+   columns change?
+2. Then set `Beta = 0` and re-run. Predict what the breeding-value plot will look like before you draw it.
+:::
+
+::: {.callout-caution title="Solution" collapse="true"}
+```{r}
+#| label: solution-ch2
+#| fig-height: 3.2
+alba <- MPM(
+  h2 = 0.2, Vp = 1, Beta = 0.15,
+  Fe = species$F[5], SA = species$SA[5], SJ = species$SJ[5],
+  S0 = species$SJ[5], Y = species$gamma[5], selectedrate = "Fe"
+)
+
+no_sel <- MPM(
+  h2 = 0.2, Vp = 1, Beta = 0,            # selection switched off
+  Fe = species$F[5], SA = species$SA[5], SJ = species$SJ[5],
+  S0 = species$SJ[5], Y = species$gamma[5], selectedrate = "Fe"
+)
+
+no_sel$properties_per_year |>
+  ggplot(aes(year, M_EBVSA)) +
+  geom_line(linewidth = 0.9, colour = "grey40") +
+  ylim(-4, 4) +
+  labs(x = "Year", y = "Mean breeding value (adults)",
+       title = "No selection \u2192 no genetic change")
+```
+
+With `Beta = 0` the mean breeding value stays flat: no selection, no adaptation. This is the
+sanity check every eco-evolutionary model should pass.
+:::

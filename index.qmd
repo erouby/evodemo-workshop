@@ -1,0 +1,58 @@
+# Welcome {.unnumbered}
+
+This is a hands-on workshop for modelling **how populations adapt to selection** using the
+*EvoDemo-Hyper* matrix population model and its R package, **`evodemohypermpm`**.
+
+The method bridges two traditions that have long talked past each other: **demographers**, who
+track populations through matrix models, and **evolutionary quantitative geneticists**, who track
+heritable traits through the breeder's equation. The EvoDemo-Hyper MPM does both at once, in a
+single, fast, transparent matrix — and lets you ask questions like *"which kind of species adapts
+fastest, and does the answer even have a single value?"*
+
+By the end you will be able to:
+
+- run an eco-evolutionary projection for a species of your choice in a single function call;
+- read and visualise its output — population size, evolving trait distributions, and adaptation rate;
+- compare how the *same* selection pressure plays out across the **slow–fast life-history continuum**;
+- understand *why* the answer to "who adapts fastest?" depends on how you define adaptation;
+- (going further) see how the hyperstate matrix is built, reproduce the paper's theory-vs-simulation
+  comparison, and export your own results to a PDF report.
+
+## Who this is for
+
+Anyone comfortable running R code who is curious about evolutionary demography. **You do not need to
+know matrix algebra** to get value from the 2-hour core — we run the model first and open the engine
+later. The "Going further" part is for those who want the machinery.
+
+## How this site works
+
+The site is a single reproducible document. Every figure you see was produced by the code printed
+just above it, so you can copy any chunk straight into your own session.
+
+::: {.callout-tip title="Three kinds of box appear throughout"}
+- **Key idea** boxes flag the one thing to remember from a section.
+- **Your turn** boxes are short exercises. Try them before opening the **Solution** — predicting the
+  answer first is what makes it stick.
+- **Heads-up** boxes warn about a modelling pitfall.
+:::
+
+You can read it online, or download the whole thing as a **PDF** from the link in the sidebar.
+
+## Schedule (≈ 2 hours + optional depth)
+
+| | Block | Time | You will… |
+|---|---|---|---|
+| 1 | [The big picture](01-big-picture.qmd) | 20 min | meet the life cycle and the model-in-one-picture |
+| 2 | [Your first model](02-first-model.qmd) | 30 min | run `MPM()`, read its output, make your first plots |
+| 3 | [Selection scenarios](03-selection-scenarios.qmd) | 30 min | put each vital rate under selection and watch traits evolve |
+| 4 | [The slow–fast continuum](04-slow-fast.qmd) | 30 min | compare five species and confront the "it depends" punchline |
+| ★ | [Under the hood](05-under-the-hood.qmd) | optional | build the hyperstate matrix; theory vs simulation |
+| ★ | [Export & extend](06-export-and-extend.qmd) | optional | PDF reports, tuning, and extensions |
+
+Please complete **[Before you arrive](setup.qmd)** so the workshop time is spent modelling, not installing.
+
+## Credit
+
+The method and the R package are the work of **Joanie Van de Walle, Jimmy Garnier, Timothée Bonnet
+and Stephanie Jenouvrier** [@vandewalle2025]. This workshop is a teaching layer on top of their
+package; please cite the original paper in any work that uses the model.

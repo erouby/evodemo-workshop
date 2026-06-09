@@ -1,0 +1,61 @@
+project:
+  type: book
+  execute-dir: project
+  output-dir: _book
+
+book:
+  title: "Modelling adaptation with the EvoDemo-Hyper MPM"
+  subtitle: "A hands-on workshop with the `evodemohypermpm` R package"
+  author: "Etienne Rouby"
+  date: today
+  date-format: "MMMM YYYY"
+  reader-mode: true
+  search: true
+  page-footer:
+    left: "Built with [Quarto](https://quarto.org). Method: Van de Walle et al. (2025) *Methods Ecol. Evol.*"
+    right: "[Source on GitHub](https://github.com/USERNAME/evodemo-workshop)"
+  repo-url: "https://github.com/USERNAME/evodemo-workshop"
+  repo-actions: [edit, issue]
+  sidebar:
+    style: docked
+    collapse-level: 1
+  chapters:
+    - index.qmd
+    - setup.qmd
+    - part: "The 2-hour core"
+      chapters:
+        - 01-big-picture.qmd
+        - 02-first-model.qmd
+        - 03-selection-scenarios.qmd
+        - 04-slow-fast.qmd
+    - part: "Going further"
+      chapters:
+        - 05-under-the-hood.qmd
+        - 06-export-and-extend.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme:
+      - cosmo
+      - theme.scss
+    toc: true
+    toc-depth: 3
+    code-link: true
+    code-copy: true
+    code-overflow: wrap
+    fig-width: 7
+    fig-height: 4.2
+    fig-align: center
+    fig-dpi: 200
+    callout-appearance: simple
+    callout-icon: true
+
+execute:
+  freeze: auto
+  echo: true
+  warning: false
+  message: false
+  cache: false
