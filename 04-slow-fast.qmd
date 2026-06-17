@@ -14,7 +14,7 @@ adaptation per year or per generation.
 ## Five species, one life cycle
 
 The five species differ only in the four numbers that fill the Leslie matrix. Sorted by generation
-time, they march from fast (a grass) to slow (an albatross):
+time, they range from fast (a grass) to slow (an albatross):
 
 ```{r}
 #| label: tbl-species
@@ -75,19 +75,21 @@ res |>
 
 Read the two panels against each other:
 
-- **Per year (left):** adaptation generally *slows down* as you move from fast to slow species — an
-  albatross changes less per calendar year than a grass. But note the exception for adult survival,
-  where intermediate species can peak.
-- **Per generation (right):** the picture rearranges. For some vital rates the slow species now look
-  *as adaptable or more so*, because each of their generations is worth many years.
+- **Per year (left):** adaptation often slows from fast to slow species when selection acts on
+  fecundity or juvenile survival. This pattern is not universal, however: when selection acts on
+  maturation or adult survival, intermediate life histories can show the highest adaptation rates.
+- **Per generation (right):** the ranking changes again. Adaptation decreases along the slow–fast
+  continuum when selection acts on juvenile survival, remains constant across species when selection
+  acts on fecundity, and increases with generation time when selection acts on maturation or adult
+  survival.
 
-## The cleanest demonstration: fertility
+## The cleanest demonstration: fecundity
 
-Zoom in on selection acting on **fertility** alone:
+Zoom in on selection acting on **fecundity** alone:
 
 ```{r}
 #| label: fig-fertility-zoom
-#| fig-cap: "Selection on fertility only. Per year, adaptation falls steeply with generation time. Per generation, it is essentially flat — every species adapts the same amount per generation."
+#| fig-cap: "Selection on fecundity only. Adaptation per year declines with generation time because the same evolutionary change is distributed across increasingly long generations. Theory predicts identical adaptation rates per generation across species; any small departures from a perfectly flat relationship reflect numerical approximation rather than biological differences (see @sec-under-the-hood)."
 #| fig-height: 3.4
 res |>
   filter(rate == "Fe") |>
@@ -98,13 +100,16 @@ res |>
   scale_colour_manual(values = c("per year" = "#B5651D", "per generation" = "#3E6E83"),
                       name = NULL) +
   labs(x = "Species (fast → slow)", y = "Adaptation rate",
-       title = "Fertility selection: a textbook result")
+       title = "Adaptation under fecundity selection")
 ```
 
-This is not a quirk of the simulation — it falls straight out of the theory. When selection acts on
-fertility, the per-generation rate reduces to $h^2 V_P\,\beta$, which contains **no species-specific
-term at all**. Per year you then divide by generation time, so the slow species lag. (We derive and
-check this in @sec-under-the-hood.)
+This pattern is predicted by the theory, not just by the simulation. When selection acts on
+fecundity, the adaptation rate per generation reduces to $h^2 V_P\,\beta$, which contains no
+life-history term. Theoretically, all species should therefore adapt at the same rate per generation.
+Small deviations visible in the numerical results likely reflect discretisation or numerical
+approximation. Per year, adaptation then declines with generation time because the same evolutionary
+change is spread across more calendar years. We derive this result and compare it with the numerical
+model in @sec-under-the-hood.
 
 ::: {.callout-tip title="Key idea — the punchline"}
 There is **no universal answer** to "which species adapts fastest." It depends on (1) the species'
@@ -125,8 +130,7 @@ years** care about, and which would a quantitative geneticist reach for?
 A manager allocating effort over the next few decades thinks in **years**, so the per-year panel is
 their world: fast species adapt more in the time available. A quantitative geneticist studying the
 *genetic* response thinks in **generations**, where the breeder's equation lives — and there the slow
-albatross is far from hopeless. Both are correct; they are answering different questions. Recognising
-which definition a claim rests on is half the battle in cross-disciplinary work on adaptation.
+albatross is far from hopeless. Both are correct; they are answering different questions.
 :::
 
 You have now done the core of the workshop: you can run the model, read it, and reason about its

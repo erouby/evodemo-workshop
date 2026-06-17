@@ -12,9 +12,11 @@ and turn that output into the three plots you will use for the rest of the works
 
 ## One function, one projection
 
-The whole model is driven by a single function, `MPM()`. We hand it the four vital rates, the
-genetics ($h^2$, $V_P$), and the selection strength ($\beta$). Let's project **species 1** (a fast,
-grass-like life history) with selection acting on fertility — the package defaults.
+The whole model is driven by a single function, `MPM()`. The model is parameterised using the
+species life cycle (the vital rates), the genetic architecture of the trait (phenotypic variance and
+heritability), and the relationship between the trait and demographic performance through selection.
+Let's project **species 1** (a fast, grass-like life history) with selection acting on fertility —
+the package defaults.
 
 ```{r}
 #| label: first-run
@@ -31,8 +33,10 @@ out <- MPM(
 )
 ```
 
-That's it — a deterministic eco-evolutionary projection over 100 years. (We pass `S0` separately
-because the model lets newborn survival differ from later juvenile survival; here we keep them equal.)
+That's it — a deterministic eco-evolutionary projection over 100 years. In the pre-breeding life
+cycle used here, fertility is defined as $F = f\,S_0$, where $S_0$ is survival from birth to the next
+census. For simplicity we assume $S_0 = S_J$, although the model can accommodate different values for
+newborn and juvenile survival (see the appendices of @vandewalle2025 for details).
 
 ## What came back
 
@@ -46,7 +50,7 @@ Three pieces matter today:
 - **`properties_per_year`** — a tidy data frame with one row per year. It holds population size `N`,
   growth rate `lambda`, the realised variances `Va`/`Vp`, and the mean breeding value of adults and
   juveniles (`M_EBVSA`, `M_EBVSJ`). This is your demographic *and* evolutionary timeline in one table.
-- **`pheno_distribution`** — the full trait distribution: how many individuals sit in each phenotype
+- **`pheno_distribution`** — the full trait distribution: the number of individuals in each phenotype
   class, every year. This is what lets us *watch* the trait evolve.
 - The scalars **`T_GEN`** (generation time), **`LAMBDA0`** (initial growth rate) and **`V`** (the mean
   change in breeding value per year — a realised adaptation rate).
@@ -66,25 +70,27 @@ ggplot(out$properties_per_year, aes(year, N)) +
   labs(x = "Year", y = "Population size", title = "Species 1 — population trajectory")
 ```
 
-::: {.callout-warning title="Heads-up — exponential growth is by design"}
-The model has **no density dependence**: selection raises $\lambda$ above 1, so the population
-explodes. We care about the *trait*, not the absolute numbers. If you want a constant-size baseline,
-set `enforce_initial_lambda1 = TRUE` (it tunes fertility so the starting $\lambda = 1$).
+::: {.callout-warning title="Heads-up — why the population grows without bound"}
+The model does not include density dependence, so positive selection can increase population growth
+above replacement and lead to exponential growth. This is intentional: the example is designed to
+illustrate evolutionary and demographic responses to selection without the additional effects of
+population regulation. If you want a constant-size baseline, set `enforce_initial_lambda1 = TRUE`
+(it tunes fertility so the starting $\lambda = 1$).
 :::
 
 ## Plot 2 — the trait evolves
 
-Here is the evolution half of the story: the mean **breeding value** climbs over time as selection
+Here is the evolution half of the story: the mean **breeding value** increases over time as selection
 favours individuals with higher trait values.
 
 ::: {.callout-important title="Your turn — predict first"}
-Before running the next chunk: with positive selection on fertility, do you expect the mean breeding
+Before running the code below: with positive selection on fertility, do you expect the mean breeding
 value to go **up**, **down**, or **stay flat**? Should adults and juveniles differ?
 :::
 
 ```{r}
 #| label: fig-breeding-value
-#| fig-cap: "Mean breeding value of adults and juveniles. Selection drags the genetic mean upward; juveniles lead because they are the freshly-recruited, more-selected cohort."
+#| fig-cap: "Mean breeding value of adults and juveniles. Selection shifts the genetic mean upward; the juvenile mean responds first because juveniles are the most recently recruited, more strongly selected cohort."
 out$properties_per_year |>
   select(year, adult = M_EBVSA, juvenile = M_EBVSJ) |>
   pivot_longer(-year, names_to = "age_class", values_to = "mean_bv") |>
@@ -96,19 +102,23 @@ out$properties_per_year |>
 
 ## Plot 3 — the whole distribution sliding
 
-Means hide the action. The trait distribution itself slides to the right as the population adapts.
-Plotting a few yearly snapshots makes the movement visible.
+The mean alone hides part of the story: the entire trait distribution shifts over time. Plotting a
+few yearly snapshots makes the movement visible. We **normalise** each year's distribution so it sums
+to 1, which isolates the shift in trait values from the change in total population size.
 
 ```{r}
 #| label: fig-pheno-distribution
-#| fig-cap: "Phenotype distribution every 20 years. The hump shifts toward higher trait values — adaptation in motion."
+#| fig-cap: "Phenotype distribution every 20 years, normalised so each year's curve sums to 1. This shows the shift in trait values independently of changes in total population size."
 out$pheno_distribution |>
+  group_by(year) |>
+  mutate(density_norm = density / sum(density)) |>
+  ungroup() |>
   filter(year %in% seq(1, 101, by = 20)) |>
-  ggplot(aes(phenotypic_midvalue, density, colour = year, group = year)) +
+  ggplot(aes(phenotypic_midvalue, density_norm, colour = year, group = year)) +
   geom_line(linewidth = 0.8) +
   scale_colour_viridis_c(option = "mako", direction = -1, name = "Year") +
-  labs(x = "Phenotype value", y = "Density",
-       title = "The trait distribution adapts over 100 years")
+  labs(x = "Phenotype value", y = "Normalised density",
+       title = "The phenotypic distribution shifts over time")
 ```
 
 ::: {.callout-tip title="Key idea"}
@@ -122,6 +132,10 @@ every figure in this workshop is one of these two objects, reshaped and plotted.
 1. Re-run the projection for the **albatross** (species 5) instead of the grass. Which `species$`
    columns change?
 2. Then set `Beta = 0` and re-run. Predict what the breeding-value plot will look like before you draw it.
+3. The model uses a pre-breeding census by default (`census = "prebreeding"`). Re-run species 1 with
+   `census = "postbreeding"` and compare. Because fertility is built differently in the two life
+   cycles (recall $F = f\,S_0$ above), the same fecundity translates into a different fertility — see
+   how this changes the projection.
 :::
 
 ::: {.callout-caution title="Solution" collapse="true"}
@@ -150,4 +164,21 @@ no_sel$properties_per_year |>
 
 With `Beta = 0` the mean breeding value stays flat: no selection, no adaptation. This is the
 sanity check every eco-evolutionary model should pass.
+
+For the census comparison, switch the one argument and re-run:
+
+```{r}
+#| label: solution-ch2-census
+#| eval: false
+post <- MPM(
+  h2 = 0.2, Vp = 1, Beta = 0.15,
+  Fe = species$F[1], SA = species$SA[1], SJ = species$SJ[1],
+  S0 = species$SJ[1], Y = species$gamma[1],
+  selectedrate = "Fe", census = "postbreeding"
+)
+```
+
+Under a post-breeding census the timing of reproduction relative to the census differs, so fertility
+is constructed from fecundity and survival in a different way. Comparing the two runs is a concrete
+way to see how a life-cycle assumption, not just a parameter value, shapes the results.
 :::

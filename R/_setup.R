@@ -38,7 +38,7 @@ age_pal <- c(adult = "#2D3748", juvenile = "#D8A657")
 # Column `F` is the paper's fertility F (the value passed to MPM(Fe = ...)).
 species <- tibble::tibble(
   species = factor(1:5),
-  label   = c("Grass / insect", "Rodent", "Passerine", "Deer", "Albatross"),
+  label   = c("Grass / insect", "Small mammal / bird", "Deer", "Primate", "Albatross / whale"),
   F       = c(10.9868, 4.9958, 0.9987, 0.3004, 0.2286),
   SA      = c(0.0365, 0.2000, 0.8000, 0.9300, 0.9500),
   SJ      = c(0.0965, 0.2500, 0.3850, 0.5050, 0.8000),

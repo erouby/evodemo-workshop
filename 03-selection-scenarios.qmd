@@ -6,7 +6,7 @@ source("R/_setup.R")
 ```
 
 ::: {.callout-note title="What you'll be able to do"}
-Put selection on each of the four vital rates in turn, run all the scenarios with a small helper,
+Put selection on each of the four vital rates in turn, run all the scenarios with a helper function,
 and read off *which* vital rate produces the fastest adaptation for a given species.
 :::
 
@@ -15,7 +15,14 @@ rate the trait influences: `"Fe"` (fertility), `"SJ"` (juvenile survival), `"SA"
 `"Y"` (maturation). Everything else stays the same — so any difference we see is *about the life
 cycle position of the trait*, not about the genetics.
 
-We'll work with **species 3** (a passerine-like, intermediate life history) so all four scenarios are
+::: {.callout-note title="A note on terminology: fecundity vs fertility"}
+The paper distinguishes *fecundity* ($f$, the per-capita number of offspring an adult produces) from
+*fertility* ($F$, the adults' contribution to the juvenile class at the next census, with
+$F = f\,S_0$ in a pre-breeding cycle). The two are easy to conflate; the `"Fe"` pathway concerns the
+production of offspring.
+:::
+
+We'll work with **species 3** (an intermediate, deer-like life history) so all four scenarios are
 well behaved.
 
 ## A helper to run one scenario
@@ -56,7 +63,7 @@ Which of fertility, juvenile survival, adult survival or maturation do you think
 
 ```{r}
 #| label: fig-bv-by-rate
-#| fig-cap: "Mean breeding value through time for species 3, under selection on each of the four vital rates. The steeper the climb, the faster the adaptation."
+#| fig-cap: "Mean breeding value through time for species 3, under selection on each of the four vital rates. A steeper slope indicates faster adaptation."
 ggplot(prop_all, aes(year, M_EBVS, colour = selected)) +
   geom_line(linewidth = 0.9) +
   scale_colour_manual(values = vital_pal, labels = vital_lab, name = "Selection on") +
@@ -97,14 +104,15 @@ adapt_rate |>
 For most life histories, a trait acting on **juvenile survival** drives the fastest per-year
 adaptation, with **fertility** close behind — because both feed directly into recruitment, the part
 of the life cycle selection can turn over quickly. Selection on **adult survival** is the slowest to
-register, especially in short-lived species. Hold this thought: in @sec-slow-fast it gets overturned.
+register, especially in short-lived species. This pattern is revisited, and qualified, in
+@sec-slow-fast.
 :::
 
-::: {.callout-warning title="Heads-up — `Beta` is on the link scale"}
-The selection strength `Beta` lives on the logit/log scale of each vital rate, so a fixed `Beta = 0.15`
-is **not** the same biological pressure across rates or species. That is deliberate — it is why the
-original study reports several *definitions* of adaptation rate (@sec-under-the-hood) — but it means
-you should compare scenarios *qualitatively* here, not read the bar heights as absolute selection.
+::: {.callout-note title="A note on interpretation"}
+The same value of `Beta` does not imply the same demographic response across vital rates or species.
+Differences among scenarios therefore reflect both the location of selection within the life cycle
+and the demographic importance of the affected vital rate. This is one reason why the original study
+considered several definitions of adaptation rate (@sec-under-the-hood).
 :::
 
 ## Your turn — change the species

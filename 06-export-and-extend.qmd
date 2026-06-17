@@ -66,9 +66,8 @@ within-life phenotype-transition matrices $\mathbf{P}_{ij}$ are identities). Mak
 and a trait can change with age or with the environment — that is plasticity, expressed in exactly the
 same matrix language as evolution.
 
-**Two-sex inheritance.** The model already tracks male *and* female breeding values, so paternal
-contributions are not ignored — a known shortcoming of several earlier evolutionary IPMs. Keep this in
-mind when comparing results to single-sex frameworks.
+**Two-sex inheritance.** The model tracks male *and* female breeding values, so paternal
+contributions enter the inheritance step explicitly.
 
 **Evolving genetic variance.** The base model holds $V_A$, $V_P$ and $h^2$ at birth constant. The
 authors note that letting $V_A$ vary is computationally cheap to add, though it requires committing to

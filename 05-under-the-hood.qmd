@@ -12,8 +12,9 @@ enters, list the six definitions of adaptation rate, and reproduce the paper's c
 matrix model agrees with the analytic theory.
 :::
 
-This part is for the curious. None of it is needed to *use* `MPM()` — but understanding the machine
-makes you trust its outputs and bend it to new questions.
+This part is for the curious. None of it is needed to *use* `MPM()`, but understanding how the model
+is constructed helps interpret its predictions, evaluate its assumptions, and apply it to new
+biological questions.
 
 ## Three dimensions instead of one
 
@@ -37,9 +38,11 @@ between steps with vec-permutation matrices** so that each block acts on the rig
 
 ## The building blocks
 
-The hyperstate matrix is assembled from a few tiny operations. Here they are — the same definitions
-the model uses internally — so you can see exactly how the machine is put together. We define them
-here so this chapter is self-contained:
+The hyperstate matrix can be decomposed into a series of biologically distinct processes — survival,
+reproduction, inheritance, and phenotype assignment. The conceptual organisation is what makes it
+tractable; the underlying mathematics (block matrices, permutations, genetic transmission) is
+genuinely sophisticated. Below are the small building blocks the model uses to implement these
+processes, defined here so this chapter is self-contained:
 
 ```{r}
 #| label: building-blocks-def
@@ -100,10 +103,10 @@ image(BD_proj_mat(toy), main = "Block-diagonal structure")
 
 ## Where inheritance enters
 
-Offspring do not copy a parent's breeding value — they sample one. Under the **Fisher infinitesimal
-model**, an offspring's breeding value is drawn from a normal distribution centred on the mid-parent
-value, with variance equal to half the additive genetic variance. The function `GVLE()` defined above
-is exactly this segregation kernel:
+Offspring do not inherit a parent's breeding value directly. Instead, their breeding value is drawn
+from a distribution centred on the average breeding value of the two parents, with variance equal to
+half the additive genetic variance — the **Fisher infinitesimal model**. The function `GVLE()`
+defined above is exactly this segregation kernel:
 
 ```{r}
 #| label: fig-segregation
@@ -189,7 +192,9 @@ A few arguments control the numerical grid. Used carelessly they produce believa
 so it pays to know them.
 
 - **`g`** — number of breeding-value/phenotype classes (default 20). More classes = finer resolution
-  but slower (≈ 1 s at `g = 10`, ≈ 8 s at `g = 40`). The paper used 40.
+  but slower (≈ 1 s at `g = 10`, ≈ 8 s at `g = 40`). The paper gives a guideline for the minimum
+  needed for accurate discretisation, $b \ge 4/\sqrt{h^2 V_P} \approx 9$ at the default genetics, and
+  used 40 classes.
 - **`xp`** — the half-range of trait values, i.e. the grid spans $[-x_p, x_p]$ (default 4).
 - **`timeA`** — number of years projected (default 100).
 
@@ -215,7 +220,7 @@ plot(risky$properties_per_year[, c("year", "Va")], type = "l",
      main = "Additive variance eroding — partly real, partly artefact")
 ```
 
-The realised additive variance drifts away from the requested value: some of this is genuine erosion
+The realised additive variance drifts away from the expected value: some of this is genuine erosion
 of variance under selection, but some is the grid being too coarse to represent a narrow
 distribution. Always check `Va` and `Vp` in `properties_per_year` against what you asked for.
 

@@ -17,10 +17,11 @@ beautifully but, in its classic form, has no genetics: it cannot let a trait *ev
 genetic) variance — and predict its response to selection with the **breeder's equation**. This
 captures evolution but tends to flatten the life cycle into a single "generation".
 
-These two pictures have sometimes produced *contradictory* claims about how fast species adapt
-[@vandewalle2025]. The EvoDemo-Hyper MPM dissolves the contradiction by doing both at once: it keeps
-the full life cycle of an MPM **and** lets a heritable trait evolve, in one matrix that is fast to
-compute and transparent to inspect.
+These two approaches have often led to different conclusions about the pace and consequences of
+adaptation because they emphasise different biological processes [@vandewalle2025]. The
+EvoDemo-Hyper MPM brings these perspectives together by combining a full demographic life cycle with
+the dynamics of a heritable trait within a single matrix framework that remains computationally
+efficient and transparent to analyse.
 
 ::: {.callout-tip title="Key idea"}
 The EvoDemo-Hyper MPM is an ordinary matrix model with **two extra dimensions bolted on**: besides
@@ -87,9 +88,9 @@ You do not need the matrix algebra to use the model — we open that engine in
 @sec-under-the-hood. For now, hold on to this:
 
 ::: {.callout-tip title="The model in one sentence"}
-Project a population through its life cycle, but on a grid of trait values, so that selection bends
-the trait distribution one way and inheritance passes the bent distribution to the next generation —
-and read off both **population dynamics** and **trait evolution** from the same run.
+Project individuals through a structured life cycle while tracking the distribution of breeding
+values and phenotypes, allowing selection, inheritance, and demography to operate simultaneously
+within a single matrix framework.
 :::
 
 ::: {.callout-important title="Your turn — make a prediction"}
