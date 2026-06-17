@@ -58,7 +58,26 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -79,7 +98,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-1138d466cb3842e747c5d9dd6b6db828.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-2529b14b0d183de5974c990c0147cfd9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-3c46f59401a3776e6802c6db4547fdb3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -314,7 +333,7 @@ window.Quarto = {
 </div>
 <section id="one-function-one-projection" class="level2" data-number="2.1">
 <h2 data-number="2.1" class="anchored" data-anchor-id="one-function-one-projection"><span class="header-section-number">2.1</span> One function, one projection</h2>
-<p>The whole model is driven by a single function, <code>MPM()</code>. We hand it the four vital rates, the genetics (<span class="math inline">\(h^2\)</span>, <span class="math inline">\(V_P\)</span>), and the selection strength (<span class="math inline">\(\beta\)</span>). Let’s project <strong>species 1</strong> (a fast, grass-like life history) with selection acting on fertility — the package defaults.</p>
+<p>The whole model is driven by a single function, <code>MPM()</code>. The model is parameterised using the species life cycle (the vital rates), the genetic architecture of the trait (phenotypic variance and heritability), and the relationship between the trait and demographic performance through selection. Let’s project <strong>species 1</strong> (a fast, grass-like life history) with selection acting on fertility — the package defaults.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>out <span class="ot">&lt;-</span> <span class="fu">MPM</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">h2   =</span> <span class="fl">0.2</span>,            <span class="co"># heritability of the selected trait</span></span>
@@ -328,7 +347,7 @@ window.Quarto = {
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">selectedrate =</span> <span class="st">"Fe"</span>   <span class="co"># the vital rate selection acts on</span></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>That’s it — a deterministic eco-evolutionary projection over 100 years. (We pass <code>S0</code> separately because the model lets newborn survival differ from later juvenile survival; here we keep them equal.)</p>
+<p>That’s it — a deterministic eco-evolutionary projection over 100 years. In the pre-breeding life cycle used here, fertility is defined as <span class="math inline">\(F = f\,S_0\)</span>, where <span class="math inline">\(S_0\)</span> is survival from birth to the next census. For simplicity we assume <span class="math inline">\(S_0 = S_J\)</span>, although the model can accommodate different values for newborn and juvenile survival (see the appendices of <span class="citation" data-cites="vandewalle2025">Van de Walle et al. (<a href="references.html#ref-vandewalle2025" role="doc-biblioref">2025</a>)</span> for details).</p>
 </section>
 <section id="what-came-back" class="level2" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="what-came-back"><span class="header-section-number">2.2</span> What came back</h2>
@@ -348,7 +367,7 @@ window.Quarto = {
 <p>Three pieces matter today:</p>
 <ul>
 <li><strong><code>properties_per_year</code></strong> — a tidy data frame with one row per year. It holds population size <code>N</code>, growth rate <code>lambda</code>, the realised variances <code>Va</code>/<code>Vp</code>, and the mean breeding value of adults and juveniles (<code>M_EBVSA</code>, <code>M_EBVSJ</code>). This is your demographic <em>and</em> evolutionary timeline in one table.</li>
-<li><strong><code>pheno_distribution</code></strong> — the full trait distribution: how many individuals sit in each phenotype class, every year. This is what lets us <em>watch</em> the trait evolve.</li>
+<li><strong><code>pheno_distribution</code></strong> — the full trait distribution: the number of individuals in each phenotype class, every year. This is what lets us <em>watch</em> the trait evolve.</li>
 <li>The scalars <strong><code>T_GEN</code></strong> (generation time), <strong><code>LAMBDA0</code></strong> (initial growth rate) and <strong><code>V</code></strong> (the mean change in breeding value per year — a realised adaptation rate).</li>
 </ul>
 <div class="cell">
@@ -383,23 +402,23 @@ Figure&nbsp;2.1: Population size over 100 years. With directional selection and 
 </div>
 </div>
 </div>
-<div class="callout callout-style-simple callout-warning callout-titled" title="Heads-up — exponential growth is by design">
+<div class="callout callout-style-simple callout-warning callout-titled" title="Heads-up — why the population grows without bound">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Warning</span>Heads-up — exponential growth is by design
+<span class="screen-reader-only">Warning</span>Heads-up — why the population grows without bound
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The model has <strong>no density dependence</strong>: selection raises <span class="math inline">\(\lambda\)</span> above 1, so the population explodes. We care about the <em>trait</em>, not the absolute numbers. If you want a constant-size baseline, set <code>enforce_initial_lambda1 = TRUE</code> (it tunes fertility so the starting <span class="math inline">\(\lambda = 1\)</span>).</p>
+<p>The model does not include density dependence, so positive selection can increase population growth above replacement and lead to exponential growth. This is intentional: the example is designed to illustrate evolutionary and demographic responses to selection without the additional effects of population regulation. If you want a constant-size baseline, set <code>enforce_initial_lambda1 = TRUE</code> (it tunes fertility so the starting <span class="math inline">\(\lambda = 1\)</span>).</p>
 </div>
 </div>
 </section>
 <section id="plot-2-the-trait-evolves" class="level2" data-number="2.4">
 <h2 data-number="2.4" class="anchored" data-anchor-id="plot-2-the-trait-evolves"><span class="header-section-number">2.4</span> Plot 2 — the trait evolves</h2>
-<p>Here is the evolution half of the story: the mean <strong>breeding value</strong> climbs over time as selection favours individuals with higher trait values.</p>
+<p>Here is the evolution half of the story: the mean <strong>breeding value</strong> increases over time as selection favours individuals with higher trait values.</p>
 <div class="callout callout-style-simple callout-important callout-titled" title="Your turn — predict first">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -410,7 +429,7 @@ Figure&nbsp;2.1: Population size over 100 years. With directional selection and 
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Before running the next chunk: with positive selection on fertility, do you expect the mean breeding value to go <strong>up</strong>, <strong>down</strong>, or <strong>stay flat</strong>? Should adults and juveniles differ?</p>
+<p>Before running the code below: with positive selection on fertility, do you expect the mean breeding value to go <strong>up</strong>, <strong>down</strong>, or <strong>stay flat</strong>? Should adults and juveniles differ?</p>
 </div>
 </div>
 <div class="cell">
@@ -428,7 +447,7 @@ Figure&nbsp;2.1: Population size over 100 years. With directional selection and 
 <img src="02-first-model_files/figure-html/fig-breeding-value-1.png" class="img-fluid figure-img" width="1400">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-breeding-value-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2.2: Mean breeding value of adults and juveniles. Selection drags the genetic mean upward; juveniles lead because they are the freshly-recruited, more-selected cohort.
+Figure&nbsp;2.2: Mean breeding value of adults and juveniles. Selection shifts the genetic mean upward; the juvenile mean responds first because juveniles are the most recently recruited, more strongly selected cohort.
 </figcaption>
 </figure>
 </div>
@@ -437,15 +456,18 @@ Figure&nbsp;2.2: Mean breeding value of adults and juveniles. Selection drags th
 </section>
 <section id="plot-3-the-whole-distribution-sliding" class="level2" data-number="2.5">
 <h2 data-number="2.5" class="anchored" data-anchor-id="plot-3-the-whole-distribution-sliding"><span class="header-section-number">2.5</span> Plot 3 — the whole distribution sliding</h2>
-<p>Means hide the action. The trait distribution itself slides to the right as the population adapts. Plotting a few yearly snapshots makes the movement visible.</p>
+<p>The mean alone hides part of the story: the entire trait distribution shifts over time. Plotting a few yearly snapshots makes the movement visible. We <strong>normalise</strong> each year’s distribution so it sums to 1, which isolates the shift in trait values from the change in total population size.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>out<span class="sc">$</span>pheno_distribution <span class="sc">|&gt;</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">%in%</span> <span class="fu">seq</span>(<span class="dv">1</span>, <span class="dv">101</span>, <span class="at">by =</span> <span class="dv">20</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(phenotypic_midvalue, density, <span class="at">colour =</span> year, <span class="at">group =</span> year)) <span class="sc">+</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_viridis_c</span>(<span class="at">option =</span> <span class="st">"mako"</span>, <span class="at">direction =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">name =</span> <span class="st">"Year"</span>) <span class="sc">+</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Phenotype value"</span>, <span class="at">y =</span> <span class="st">"Density"</span>,</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"The trait distribution adapts over 100 years"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year) <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">density_norm =</span> density <span class="sc">/</span> <span class="fu">sum</span>(density)) <span class="sc">|&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">%in%</span> <span class="fu">seq</span>(<span class="dv">1</span>, <span class="dv">101</span>, <span class="at">by =</span> <span class="dv">20</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(phenotypic_midvalue, density_norm, <span class="at">colour =</span> year, <span class="at">group =</span> year)) <span class="sc">+</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_viridis_c</span>(<span class="at">option =</span> <span class="st">"mako"</span>, <span class="at">direction =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">name =</span> <span class="st">"Year"</span>) <span class="sc">+</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Phenotype value"</span>, <span class="at">y =</span> <span class="st">"Normalised density"</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"The phenotypic distribution shifts over time"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div id="fig-pheno-distribution" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -453,7 +475,7 @@ Figure&nbsp;2.2: Mean breeding value of adults and juveniles. Selection drags th
 <img src="02-first-model_files/figure-html/fig-pheno-distribution-1.png" class="img-fluid figure-img" width="1400">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pheno-distribution-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2.3: Phenotype distribution every 20 years. The hump shifts toward higher trait values — adaptation in motion.
+Figure&nbsp;2.3: Phenotype distribution every 20 years, normalised so each year’s curve sums to 1. This shows the shift in trait values independently of changes in total population size.
 </figcaption>
 </figure>
 </div>
@@ -488,6 +510,7 @@ Figure&nbsp;2.3: Phenotype distribution every 20 years. The hump shifts toward h
 <ol type="1">
 <li>Re-run the projection for the <strong>albatross</strong> (species 5) instead of the grass. Which <code>species$</code> columns change?</li>
 <li>Then set <code>Beta = 0</code> and re-run. Predict what the breeding-value plot will look like before you draw it.</li>
+<li>The model uses a pre-breeding census by default (<code>census = "prebreeding"</code>). Re-run species 1 with <code>census = "postbreeding"</code> and compare. Because fertility is built differently in the two life cycles (recall <span class="math inline">\(F = f\,S_0\)</span> above), the same fecundity translates into a different fertility — see how this changes the projection.</li>
 </ol>
 </div>
 </div>
@@ -531,11 +554,26 @@ Figure&nbsp;2.3: Phenotype distribution every 20 years. The hump shifts toward h
 </div>
 </div>
 <p>With <code>Beta = 0</code> the mean breeding value stays flat: no selection, no adaptation. This is the sanity check every eco-evolutionary model should pass.</p>
+<p>For the census comparison, switch the one argument and re-run:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>post <span class="ot">&lt;-</span> <span class="fu">MPM</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">h2 =</span> <span class="fl">0.2</span>, <span class="at">Vp =</span> <span class="dv">1</span>, <span class="at">Beta =</span> <span class="fl">0.15</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Fe =</span> species<span class="sc">$</span>F[<span class="dv">1</span>], <span class="at">SA =</span> species<span class="sc">$</span>SA[<span class="dv">1</span>], <span class="at">SJ =</span> species<span class="sc">$</span>SJ[<span class="dv">1</span>],</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">S0 =</span> species<span class="sc">$</span>SJ[<span class="dv">1</span>], <span class="at">Y =</span> species<span class="sc">$</span>gamma[<span class="dv">1</span>],</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">selectedrate =</span> <span class="st">"Fe"</span>, <span class="at">census =</span> <span class="st">"postbreeding"</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Under a post-breeding census the timing of reproduction relative to the census differs, so fertility is constructed from fecundity and survival in a different way. Comparing the two runs is a concrete way to see how a life-cycle assumption, not just a parameter value, shapes the results.</p>
 </div>
 </div>
 </div>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-vandewalle2025" class="csl-entry" role="listitem">
+Van de Walle, Joanie, Jimmy Garnier, Timothée Bonnet, and Stephanie Jenouvrier. 2025. <span>“Toward a Unified Approach to Modelling Adaptation Among Demographers and Evolutionary Ecologists.”</span> <em>Methods in Ecology and Evolution</em> 16 (8): 1644–57. <a href="https://doi.org/10.1111/2041-210X.70075">https://doi.org/10.1111/2041-210X.70075</a>.
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->

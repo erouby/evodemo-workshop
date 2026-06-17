@@ -79,7 +79,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-1138d466cb3842e747c5d9dd6b6db828.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-2529b14b0d183de5974c990c0147cfd9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-3c46f59401a3776e6802c6db4547fdb3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -108,6 +108,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -277,11 +306,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Put selection on each of the four vital rates in turn, run all the scenarios with a small helper, and read off <em>which</em> vital rate produces the fastest adaptation for a given species.</p>
+<p>Put selection on each of the four vital rates in turn, run all the scenarios with a helper function, and read off <em>which</em> vital rate produces the fastest adaptation for a given species.</p>
 </div>
 </div>
 <p>Selection does not have to act on fertility. The <code>selectedrate</code> argument lets you choose which vital rate the trait influences: <code>"Fe"</code> (fertility), <code>"SJ"</code> (juvenile survival), <code>"SA"</code> (adult survival) or <code>"Y"</code> (maturation). Everything else stays the same — so any difference we see is <em>about the life cycle position of the trait</em>, not about the genetics.</p>
-<p>We’ll work with <strong>species 3</strong> (a passerine-like, intermediate life history) so all four scenarios are well behaved.</p>
+<div class="callout callout-style-simple callout-note callout-titled" title="A note on terminology: fecundity vs fertility">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>A note on terminology: fecundity vs fertility
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The paper distinguishes <em>fecundity</em> (<span class="math inline">\(f\)</span>, the per-capita number of offspring an adult produces) from <em>fertility</em> (<span class="math inline">\(F\)</span>, the adults’ contribution to the juvenile class at the next census, with <span class="math inline">\(F = f\,S_0\)</span> in a pre-breeding cycle). The two are easy to conflate; the <code>"Fe"</code> pathway concerns the production of offspring.</p>
+</div>
+</div>
+<p>We’ll work with <strong>species 3</strong> (an intermediate, deer-like life history) so all four scenarios are well behaved.</p>
 <section id="a-helper-to-run-one-scenario" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="a-helper-to-run-one-scenario"><span class="header-section-number">3.1</span> A helper to run one scenario</h2>
 <p>Rather than copy-paste the call four times, wrap it once and vary only <code>selectedrate</code>:</p>
@@ -333,7 +375,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <img src="03-selection-scenarios_files/figure-html/fig-bv-by-rate-1.png" class="img-fluid figure-img" width="1400">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bv-by-rate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.1: Mean breeding value through time for species 3, under selection on each of the four vital rates. The steeper the climb, the faster the adaptation.
+Figure&nbsp;3.1: Mean breeding value through time for species 3, under selection on each of the four vital rates. A steeper slope indicates faster adaptation.
 </figcaption>
 </figure>
 </div>
@@ -399,20 +441,20 @@ Figure&nbsp;3.2: Realised adaptation rate per year by selected vital rate (speci
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>For most life histories, a trait acting on <strong>juvenile survival</strong> drives the fastest per-year adaptation, with <strong>fertility</strong> close behind — because both feed directly into recruitment, the part of the life cycle selection can turn over quickly. Selection on <strong>adult survival</strong> is the slowest to register, especially in short-lived species. Hold this thought: in <a href="04-slow-fast.html" class="quarto-xref"><span>Chapter 4</span></a> it gets overturned.</p>
+<p>For most life histories, a trait acting on <strong>juvenile survival</strong> drives the fastest per-year adaptation, with <strong>fertility</strong> close behind — because both feed directly into recruitment, the part of the life cycle selection can turn over quickly. Selection on <strong>adult survival</strong> is the slowest to register, especially in short-lived species. This pattern is revisited, and qualified, in <a href="04-slow-fast.html" class="quarto-xref"><span>Chapter 4</span></a>.</p>
 </div>
 </div>
-<div class="callout callout-style-simple callout-warning callout-titled" title="Heads-up — `Beta` is on the link scale">
+<div class="callout callout-style-simple callout-note callout-titled" title="A note on interpretation">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Warning</span>Heads-up — <code>Beta</code> is on the link scale
+<span class="screen-reader-only">Note</span>A note on interpretation
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The selection strength <code>Beta</code> lives on the logit/log scale of each vital rate, so a fixed <code>Beta = 0.15</code> is <strong>not</strong> the same biological pressure across rates or species. That is deliberate — it is why the original study reports several <em>definitions</em> of adaptation rate (<a href="05-under-the-hood.html" class="quarto-xref"><span>Chapter 5</span></a>) — but it means you should compare scenarios <em>qualitatively</em> here, not read the bar heights as absolute selection.</p>
+<p>The same value of <code>Beta</code> does not imply the same demographic response across vital rates or species. Differences among scenarios therefore reflect both the location of selection within the life cycle and the demographic importance of the affected vital rate. This is one reason why the original study considered several definitions of adaptation rate (<a href="05-under-the-hood.html" class="quarto-xref"><span>Chapter 5</span></a>).</p>
 </div>
 </div>
 </section>
@@ -432,7 +474,7 @@ Figure&nbsp;3.2: Realised adaptation rate per year by selected vital rate (speci
 </div>
 </div>
 <div class="callout callout-style-simple callout-caution callout-titled" title="Solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -441,7 +483,7 @@ Figure&nbsp;3.2: Realised adaptation rate per year by selected vital rate (speci
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>runs5 <span class="ot">&lt;-</span> <span class="fu">set_names</span>(rates) <span class="sc">|&gt;</span> <span class="fu">map</span>(\(r) <span class="fu">run_scenario</span>(r, <span class="at">sp =</span> <span class="dv">5</span>))</span>

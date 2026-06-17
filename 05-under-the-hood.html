@@ -98,7 +98,7 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-1138d466cb3842e747c5d9dd6b6db828.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-2529b14b0d183de5974c990c0147cfd9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-3c46f59401a3776e6802c6db4547fdb3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -331,7 +331,7 @@ window.Quarto = {
 <p>Describe how the hyperstate matrix is assembled from small building blocks, see where inheritance enters, list the six definitions of adaptation rate, and reproduce the paper’s check that the matrix model agrees with the analytic theory.</p>
 </div>
 </div>
-<p>This part is for the curious. None of it is needed to <em>use</em> <code>MPM()</code> — but understanding the machine makes you trust its outputs and bend it to new questions.</p>
+<p>This part is for the curious. None of it is needed to <em>use</em> <code>MPM()</code>, but understanding how the model is constructed helps interpret its predictions, evaluate its assumptions, and apply it to new biological questions.</p>
 <section id="three-dimensions-instead-of-one" class="level2" data-number="5.1">
 <h2 data-number="5.1" class="anchored" data-anchor-id="three-dimensions-instead-of-one"><span class="header-section-number">5.1</span> Three dimensions instead of one</h2>
 <p>A classic MPM tracks individuals by <strong>stage</strong> only — a vector of (juveniles, adults). The EvoDemo-Hyper MPM tracks them by <strong>stage × breeding value × phenotype</strong>: a three-dimensional <em>hyperstate</em> <span class="citation" data-cites="roth2016">(<a href="references.html#ref-roth2016" role="doc-biblioref">Roth and Caswell 2016</a>)</span>. Each cell counts the individuals that are, say, “adult, with breeding value class 12, expressing phenotype class 15”.</p>
@@ -345,7 +345,7 @@ window.Quarto = {
 </section>
 <section id="the-building-blocks" class="level2" data-number="5.2">
 <h2 data-number="5.2" class="anchored" data-anchor-id="the-building-blocks"><span class="header-section-number">5.2</span> The building blocks</h2>
-<p>The hyperstate matrix is assembled from a few tiny operations. Here they are — the same definitions the model uses internally — so you can see exactly how the machine is put together. We define them here so this chapter is self-contained:</p>
+<p>The hyperstate matrix can be decomposed into a series of biologically distinct processes — survival, reproduction, inheritance, and phenotype assignment. The conceptual organisation is what makes it tractable; the underlying mathematics (block matrices, permutations, genetic transmission) is genuinely sophisticated. Below are the small building blocks the model uses to implement these processes, defined here so this chapter is self-contained:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Emat <span class="ot">&lt;-</span> <span class="cf">function</span>(i, j, u) {                 <span class="co"># a matrix of zeros with a single 1 at (i, j)</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  E <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> u, <span class="at">ncol =</span> u)</span>
@@ -416,7 +416,7 @@ Figure&nbsp;5.1: A block-diagonal matrix built by <code>BD_proj_mat()</code> fro
 </section>
 <section id="where-inheritance-enters" class="level2" data-number="5.3">
 <h2 data-number="5.3" class="anchored" data-anchor-id="where-inheritance-enters"><span class="header-section-number">5.3</span> Where inheritance enters</h2>
-<p>Offspring do not copy a parent’s breeding value — they sample one. Under the <strong>Fisher infinitesimal model</strong>, an offspring’s breeding value is drawn from a normal distribution centred on the mid-parent value, with variance equal to half the additive genetic variance. The function <code>GVLE()</code> defined above is exactly this segregation kernel:</p>
+<p>Offspring do not inherit a parent’s breeding value directly. Instead, their breeding value is drawn from a distribution centred on the average breeding value of the two parents, with variance equal to half the additive genetic variance — the <strong>Fisher infinitesimal model</strong>. The function <code>GVLE()</code> defined above is exactly this segregation kernel:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>zz <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="at">by =</span> <span class="fl">0.05</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">z =</span> zz, <span class="at">density =</span> <span class="fu">GVLE</span>(zz, <span class="at">Va =</span> <span class="fl">0.2</span>)) <span class="sc">|&gt;</span></span>
@@ -511,7 +511,7 @@ Figure&nbsp;5.3: Per-year adaptation rate: bars are the realised values from <co
 <h2 data-number="5.6" class="anchored" data-anchor-id="tuning-and-the-artefacts-to-watch"><span class="header-section-number">5.6</span> Tuning and the artefacts to watch</h2>
 <p>A few arguments control the numerical grid. Used carelessly they produce believable-looking nonsense, so it pays to know them.</p>
 <ul>
-<li><strong><code>g</code></strong> — number of breeding-value/phenotype classes (default 20). More classes = finer resolution but slower (≈ 1 s at <code>g = 10</code>, ≈ 8 s at <code>g = 40</code>). The paper used 40.</li>
+<li><strong><code>g</code></strong> — number of breeding-value/phenotype classes (default 20). More classes = finer resolution but slower (≈ 1 s at <code>g = 10</code>, ≈ 8 s at <code>g = 40</code>). The paper gives a guideline for the minimum needed for accurate discretisation, <span class="math inline">\(b \ge 4/\sqrt{h^2 V_P} \approx 9\)</span> at the default genetics, and used 40 classes.</li>
 <li><strong><code>xp</code></strong> — the half-range of trait values, i.e.&nbsp;the grid spans <span class="math inline">\([-x_p, x_p]\)</span> (default 4).</li>
 <li><strong><code>timeA</code></strong> — number of years projected (default 100).</li>
 </ul>
@@ -1356,7 +1356,7 @@ to see the realised h2. You may increase xp or decrease g.</code></pre>
 </div>
 </div>
 </div>
-<p>The realised additive variance drifts away from the requested value: some of this is genuine erosion of variance under selection, but some is the grid being too coarse to represent a narrow distribution. Always check <code>Va</code> and <code>Vp</code> in <code>properties_per_year</code> against what you asked for.</p>
+<p>The realised additive variance drifts away from the expected value: some of this is genuine erosion of variance under selection, but some is the grid being too coarse to represent a narrow distribution. Always check <code>Va</code> and <code>Vp</code> in <code>properties_per_year</code> against what you asked for.</p>
 <p>Two more useful switches:</p>
 <ul>
 <li><strong><code>enforce_initial_lambda1 = TRUE</code></strong> adjusts fertility so the population starts at <span class="math inline">\(\lambda = 1\)</span> (a stationary baseline) — handy when you want to isolate evolution from raw growth.</li>

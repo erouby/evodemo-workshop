@@ -98,7 +98,7 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-1138d466cb3842e747c5d9dd6b6db828.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-2529b14b0d183de5974c990c0147cfd9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-3c46f59401a3776e6802c6db4547fdb3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -290,7 +290,7 @@ window.Quarto = {
   <li><a href="#five-species-one-life-cycle" id="toc-five-species-one-life-cycle" class="nav-link active" data-scroll-target="#five-species-one-life-cycle"><span class="header-section-number">4.1</span> Five species, one life cycle</a></li>
   <li><a href="#project-every-species-under-every-selection-scenario" id="toc-project-every-species-under-every-selection-scenario" class="nav-link" data-scroll-target="#project-every-species-under-every-selection-scenario"><span class="header-section-number">4.2</span> Project every species under every selection scenario</a></li>
   <li><a href="#the-same-result-two-definitions" id="toc-the-same-result-two-definitions" class="nav-link" data-scroll-target="#the-same-result-two-definitions"><span class="header-section-number">4.3</span> The same result, two definitions</a></li>
-  <li><a href="#the-cleanest-demonstration-fertility" id="toc-the-cleanest-demonstration-fertility" class="nav-link" data-scroll-target="#the-cleanest-demonstration-fertility"><span class="header-section-number">4.4</span> The cleanest demonstration: fertility</a></li>
+  <li><a href="#the-cleanest-demonstration-fecundity" id="toc-the-cleanest-demonstration-fecundity" class="nav-link" data-scroll-target="#the-cleanest-demonstration-fecundity"><span class="header-section-number">4.4</span> The cleanest demonstration: fecundity</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/USERNAME/evodemo-workshop/edit/main/04-slow-fast.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/USERNAME/evodemo-workshop/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -331,7 +331,7 @@ window.Quarto = {
 </div>
 <section id="five-species-one-life-cycle" class="level2" data-number="4.1">
 <h2 data-number="4.1" class="anchored" data-anchor-id="five-species-one-life-cycle"><span class="header-section-number">4.1</span> Five species, one life cycle</h2>
-<p>The five species differ only in the four numbers that fill the Leslie matrix. Sorted by generation time, they march from fast (a grass) to slow (an albatross):</p>
+<p>The five species differ only in the four numbers that fill the Leslie matrix. Sorted by generation time, they range from fast (a grass) to slow (an albatross):</p>
 <div id="tbl-species" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-species-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -344,13 +344,13 @@ Table&nbsp;4.1
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">`</span><span class="at">Maturation γ</span><span class="st">`</span> <span class="ot">=</span> gamma, <span class="st">`</span><span class="at">Generation time T</span><span class="st">`</span> <span class="ot">=</span> Tgen)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 7
-  Species `Life history` `Fertility F` `Adult surv. SA` `Juv. surv. SJ`
-  &lt;fct&gt;   &lt;chr&gt;                  &lt;dbl&gt;            &lt;dbl&gt;           &lt;dbl&gt;
-1 1       Grass / insect        11.0             0.0365          0.0965
-2 2       Rodent                 5.00            0.2             0.25  
-3 3       Passerine              0.999           0.8             0.385 
-4 4       Deer                   0.300           0.93            0.505 
-5 5       Albatross              0.229           0.95            0.8   
+  Species `Life history`      `Fertility F` `Adult surv. SA` `Juv. surv. SJ`
+  &lt;fct&gt;   &lt;chr&gt;                       &lt;dbl&gt;            &lt;dbl&gt;           &lt;dbl&gt;
+1 1       Grass / insect             11.0             0.0365          0.0965
+2 2       Small mammal / bird         5.00            0.2             0.25  
+3 3       Deer                        0.999           0.8             0.385 
+4 4       Primate                     0.300           0.93            0.505 
+5 5       Albatross / whale           0.229           0.95            0.8   
 # ℹ 2 more variables: `Maturation γ` &lt;dbl&gt;, `Generation time T` &lt;dbl&gt;</code></pre>
 </div>
 </div>
@@ -411,13 +411,13 @@ Figure&nbsp;4.1: Adaptation rate across the slow–fast continuum (species 1 = f
 </div>
 <p>Read the two panels against each other:</p>
 <ul>
-<li><strong>Per year (left):</strong> adaptation generally <em>slows down</em> as you move from fast to slow species — an albatross changes less per calendar year than a grass. But note the exception for adult survival, where intermediate species can peak.</li>
-<li><strong>Per generation (right):</strong> the picture rearranges. For some vital rates the slow species now look <em>as adaptable or more so</em>, because each of their generations is worth many years.</li>
+<li><strong>Per year (left):</strong> adaptation often slows from fast to slow species when selection acts on fecundity or juvenile survival. This pattern is not universal, however: when selection acts on maturation or adult survival, intermediate life histories can show the highest adaptation rates.</li>
+<li><strong>Per generation (right):</strong> the ranking changes again. Adaptation decreases along the slow–fast continuum when selection acts on juvenile survival, remains constant across species when selection acts on fecundity, and increases with generation time when selection acts on maturation or adult survival.</li>
 </ul>
 </section>
-<section id="the-cleanest-demonstration-fertility" class="level2" data-number="4.4">
-<h2 data-number="4.4" class="anchored" data-anchor-id="the-cleanest-demonstration-fertility"><span class="header-section-number">4.4</span> The cleanest demonstration: fertility</h2>
-<p>Zoom in on selection acting on <strong>fertility</strong> alone:</p>
+<section id="the-cleanest-demonstration-fecundity" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="the-cleanest-demonstration-fecundity"><span class="header-section-number">4.4</span> The cleanest demonstration: fecundity</h2>
+<p>Zoom in on selection acting on <strong>fecundity</strong> alone:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>res <span class="sc">|&gt;</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(rate <span class="sc">==</span> <span class="st">"Fe"</span>) <span class="sc">|&gt;</span></span>
@@ -428,7 +428,7 @@ Figure&nbsp;4.1: Adaptation rate across the slow–fast continuum (species 1 = f
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"per year"</span> <span class="ot">=</span> <span class="st">"#B5651D"</span>, <span class="st">"per generation"</span> <span class="ot">=</span> <span class="st">"#3E6E83"</span>),</span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>                      <span class="at">name =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Species (fast → slow)"</span>, <span class="at">y =</span> <span class="st">"Adaptation rate"</span>,</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Fertility selection: a textbook result"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Adaptation under fecundity selection"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div id="fig-fertility-zoom" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -436,13 +436,13 @@ Figure&nbsp;4.1: Adaptation rate across the slow–fast continuum (species 1 = f
 <img src="04-slow-fast_files/figure-html/fig-fertility-zoom-1.png" class="img-fluid figure-img" width="1400">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-fertility-zoom-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4.2: Selection on fertility only. Per year, adaptation falls steeply with generation time. Per generation, it is essentially flat — every species adapts the same amount per generation.
+Figure&nbsp;4.2: Selection on fecundity only. Adaptation per year declines with generation time because the same evolutionary change is distributed across increasingly long generations. Theory predicts identical adaptation rates per generation across species; any small departures from a perfectly flat relationship reflect numerical approximation rather than biological differences (see <a href="05-under-the-hood.html" class="quarto-xref"><span>Chapter 5</span></a>).
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>This is not a quirk of the simulation — it falls straight out of the theory. When selection acts on fertility, the per-generation rate reduces to <span class="math inline">\(h^2 V_P\,\beta\)</span>, which contains <strong>no species-specific term at all</strong>. Per year you then divide by generation time, so the slow species lag. (We derive and check this in <a href="05-under-the-hood.html" class="quarto-xref"><span>Chapter 5</span></a>.)</p>
+<p>This pattern is predicted by the theory, not just by the simulation. When selection acts on fecundity, the adaptation rate per generation reduces to <span class="math inline">\(h^2 V_P\,\beta\)</span>, which contains no life-history term. Theoretically, all species should therefore adapt at the same rate per generation. Small deviations visible in the numerical results likely reflect discretisation or numerical approximation. Per year, adaptation then declines with generation time because the same evolutionary change is spread across more calendar years. We derive this result and compare it with the numerical model in <a href="05-under-the-hood.html" class="quarto-xref"><span>Chapter 5</span></a>.</p>
 <div class="callout callout-style-simple callout-tip callout-titled" title="Key idea — the punchline">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -481,7 +481,7 @@ Figure&nbsp;4.2: Selection on fertility only. Per year, adaptation falls steeply
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>A manager allocating effort over the next few decades thinks in <strong>years</strong>, so the per-year panel is their world: fast species adapt more in the time available. A quantitative geneticist studying the <em>genetic</em> response thinks in <strong>generations</strong>, where the breeder’s equation lives — and there the slow albatross is far from hopeless. Both are correct; they are answering different questions. Recognising which definition a claim rests on is half the battle in cross-disciplinary work on adaptation.</p>
+<p>A manager allocating effort over the next few decades thinks in <strong>years</strong>, so the per-year panel is their world: fast species adapt more in the time available. A quantitative geneticist studying the <em>genetic</em> response thinks in <strong>generations</strong>, where the breeder’s equation lives — and there the slow albatross is far from hopeless. Both are correct; they are answering different questions.</p>
 </div>
 </div>
 </div>

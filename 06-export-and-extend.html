@@ -98,7 +98,7 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-1138d466cb3842e747c5d9dd6b6db828.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-2529b14b0d183de5974c990c0147cfd9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-3c46f59401a3776e6802c6db4547fdb3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -371,7 +371,7 @@ window.Quarto = {
 <h2 data-number="6.2" class="anchored" data-anchor-id="extending-the-model"><span class="header-section-number">6.2</span> Extending the model</h2>
 <p>The two-stage life cycle with one trait is a teaching scaffold. The same framework reaches further — here is where to look next, all grounded in the original paper <span class="citation" data-cites="vandewalle2025">(<a href="references.html#ref-vandewalle2025" role="doc-biblioref">Van de Walle et al. 2025</a>)</span>.</p>
 <p><strong>Phenotypic plasticity.</strong> In the base model an individual keeps its phenotype for life (the within-life phenotype-transition matrices <span class="math inline">\(\mathbf{P}_{ij}\)</span> are identities). Make them <em>non-identity</em> and a trait can change with age or with the environment — that is plasticity, expressed in exactly the same matrix language as evolution.</p>
-<p><strong>Two-sex inheritance.</strong> The model already tracks male <em>and</em> female breeding values, so paternal contributions are not ignored — a known shortcoming of several earlier evolutionary IPMs. Keep this in mind when comparing results to single-sex frameworks.</p>
+<p><strong>Two-sex inheritance.</strong> The model tracks male <em>and</em> female breeding values, so paternal contributions enter the inheritance step explicitly.</p>
 <p><strong>Evolving genetic variance.</strong> The base model holds <span class="math inline">\(V_A\)</span>, <span class="math inline">\(V_P\)</span> and <span class="math inline">\(h^2\)</span> at birth constant. The authors note that letting <span class="math inline">\(V_A\)</span> vary is computationally cheap to add, though it requires committing to assumptions about genetic architecture.</p>
 <p><strong>Richer life cycles.</strong> Nothing restricts the demography to two stages. The vec-permutation construction scales to any stage-structured life cycle — including the kinds of long-lived marine and terrestrial vertebrates these methods were built for.</p>
 </section>
